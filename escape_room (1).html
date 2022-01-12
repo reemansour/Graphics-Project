@@ -1,0 +1,890 @@
+<html>
+  <head>
+    <title>Escape room</title>
+    <style>
+      body {
+        margin: 0;
+      }
+
+      canvas {
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+
+
+    <script type="module">
+      import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.117.1/build/three.module.js";
+      import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.124.0/examples/jsm/loaders/GLTFLoader.js";
+	    import { DragControls } from "https://cdn.jsdelivr.net/npm/three@0.114/examples/jsm/controls/DragControls.js";
+
+
+      var ON = true; //for light
+			var sofaMoved = false;
+      var scene = new THREE.Scene();
+      scene.background = new THREE.Color(0xffffff);
+      var camera = new THREE.PerspectiveCamera(  70,window.innerWidth / window.innerHeight,  0.1,  1000);
+
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+
+      // check when the browser size has changed and adjust the camera accordingly
+      window.addEventListener("resize", function () {
+        var WIDTH = window.innerWidth;
+        var HEIGHT = window.innerHeight;
+        renderer.setSize(WIDTH, HEIGHT);
+        camera.aspect = WIDTH / HEIGHT;
+        camera.updateProjectionMatrix();
+      });
+
+
+      camera.position.z = 9.743317683770027;
+      camera.position.y = -0.25 * 5;
+
+      // const controls = new OrbitControls( camera, renderer.domElement );
+
+      // CUBE
+      var geometry = new THREE.BoxGeometry(2, 2, 2);
+      var cubeMaterials = [
+        new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("box.jpg"),
+          side: THREE.DoubleSide,
+        }), // Right side
+        new THREE.MeshPhongMaterial({
+          map: new THREE.TextureLoader().load("box.jpg"),
+          side: THREE.DoubleSide,
+        }), // Left side
+        new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("box.jpg"),
+          side: THREE.DoubleSide,
+        }), // Top side
+        new THREE.MeshPhongMaterial({
+          map: new THREE.TextureLoader().load("box.jpg"),
+          side: THREE.DoubleSide,
+        }), // Bottom side
+        new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("box.jpg"),
+          side: THREE.DoubleSide,
+        }), // Front side
+        new THREE.MeshPhongMaterial({
+          map: new THREE.TextureLoader().load("box.jpg"),
+          side: THREE.DoubleSide,
+        }), // Back side
+      ];
+
+      // Create a MeshFaceMaterial, which allows the cube to have different materials on each face
+      var cubeMaterial = new THREE.MeshFaceMaterial(cubeMaterials);
+      var cube = new THREE.Mesh(geometry, cubeMaterial);
+      cube.position.y = -4;
+      cube.position.z = -5;
+      cube.position.x = 4;
+
+      scene.add(cube);
+
+	  let controls, group;
+			let enableSelection = false;
+
+			const objects = [];
+
+
+		objects.push( cube );
+
+		controls = new DragControls( [ ... objects ], camera, renderer.domElement );
+				controls.addEventListener( 'drag', render );
+				document.addEventListener( 'click', onClick );
+				window.addEventListener( 'keydown', onKeyDown );
+				window.addEventListener( 'keyup', onKeyUp );
+
+				function onKeyDown( event ) {
+
+				enableSelection = ( event.keyCode === 16 ) ? true : false;
+
+			}
+
+			function onKeyUp() {
+
+				enableSelection = false;
+
+			}
+			function animate() {
+
+requestAnimationFrame( animate );
+renderer.render( scene, camera );
+
+			}
+
+			function onClick( event ) {
+					{
+						enableSelection=false;
+					}
+
+				event.preventDefault();
+
+				if ( enableSelection === true ) {
+
+					const draggableObjects = controls.getObjects();
+					draggableObjects.length = 0;
+					mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+					mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+					console.log(mouse.x, mouse.y);
+
+					if(mouse.x==0.8)
+					{
+						enableSelection=false;
+					}
+					raycaster.setFromCamera( mouse, camera );
+
+					const intersections = raycaster.intersectObjects( objects, true );
+
+
+				}
+
+
+				animate();
+			}
+
+
+      //SECRET CUBE 1//////////////////
+      var geometry1 = new THREE.BoxGeometry(0.1, 2, 2);
+
+      var cube1Material = new THREE.MeshLambertMaterial({
+        map: new THREE.TextureLoader().load("my_safe.jpg"),
+      });
+      var cube1 = new THREE.Mesh(geometry1, cube1Material);
+      cube1.position.x = 9;
+      cube1.position.y = 1.5;
+      cube1.position.z = -9;
+      cube1.rotation.y = Math.PI / 2;
+
+      renderer.domElement.addEventListener("pointerup", (event) => {
+        mouse.x =
+          (event.clientX / renderer.domElement.clientWidth -
+            renderer.domElement.getBoundingClientRect().x) *
+            2 -
+          1;
+        mouse.y =
+          -(
+            event.clientY / renderer.domElement.clientHeight +
+            renderer.domElement.getBoundingClientRect().y
+          ) *
+            2 +
+          1;
+        raycaster.setFromCamera(mouse, camera);
+        var object3 = [];
+        object3.push(cube1);
+        const intersects = raycaster.intersectObjects(object3, true);
+        if (intersects.length > 0) {
+          openBox();
+        }
+      });
+
+      //////////////////////////////SAFEEEEE//////////////////////////
+
+      var material1 = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load("safe.jpg"),
+        side: THREE.FrontSide,
+      });
+      var material2 = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load("safe.jpg"),
+        side: THREE.FrontSide,
+      });
+      var material3 = new THREE.MeshBasicMaterial({
+        map: new THREE.TextureLoader().load("safe.jpg"),
+        side: THREE.FrontSide,
+      });
+
+      var materialTransparent = new THREE.MeshBasicMaterial({ color: "black" });
+      var geometry = new THREE.BoxBufferGeometry(1, 1.5, 1);
+
+      var materials = [
+        material1,
+        material2,
+        material3,
+        material2,
+        material2,
+        material2,
+      ];
+      var materialsx = [
+        material1,
+        material2,
+        materialTransparent,
+        material2,
+        material3,
+        material3,
+      ];
+      var safe = new THREE.Mesh(geometry, materials);
+      safe.position.y = -4.5;
+      safe.position.z = -6;
+      safe.position.x = -10;
+
+      scene.add(safe);
+
+      ////////////////////////////// ROOM //////////////////////////////////////
+
+      var room = function () {
+        let materialArray = [];
+        const ft = new THREE.TextureLoader().load("Lycksele3/posx.jpg");
+        const bk = new THREE.TextureLoader().load("Lycksele3/negx.jpg");
+        const up = new THREE.TextureLoader().load("Lycksele3/posy.jpg");
+        const dn = new THREE.TextureLoader().load("Lycksele3/negy.jpg");
+        const rt = new THREE.TextureLoader().load("Lycksele3/posz.jpg");
+        const lf = new THREE.TextureLoader().load("Lycksele3/negz.jpg");
+
+        materialArray.push(new THREE.MeshBasicMaterial({ map: ft }));
+        materialArray.push(new THREE.MeshBasicMaterial({ map: bk }));
+        materialArray.push(new THREE.MeshBasicMaterial({ map: up }));
+        materialArray.push(new THREE.MeshBasicMaterial({ map: dn }));
+        materialArray.push(new THREE.MeshBasicMaterial({ map: rt }));
+        materialArray.push(new THREE.MeshBasicMaterial({ map: lf }));
+        for (var i = 0; i < 6; i++) {
+          materialArray[i].side = THREE.BackSide;
+        }
+
+        var skyboxGeo = new THREE.BoxGeometry(1000, 1000, 1000);
+        var skybox = new THREE.Mesh(skyboxGeo, materialArray);
+        scene.add(skybox);
+
+        // Floor
+        var floorGeometry1 = new THREE.BoxGeometry(30, 0.3, 8);
+        var floorMaterial = new THREE.MeshPhongMaterial({
+          map: new THREE.TextureLoader().load("hey3.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var floorCube1 = new THREE.Mesh(floorGeometry1, floorMaterial);
+        floorCube1.position.y = -5;
+        floorCube1.position.z = 6;
+        scene.add(floorCube1);
+
+        var floorGeometry2 = new THREE.BoxGeometry(30, 0.3, 8);
+        // var floorMaterial = new THREE.MeshPhongMaterial( { map: new THREE.TextureLoader( ).load( 'img.jpg' ), side: THREE.DoubleSide } );
+        var floorCube2 = new THREE.Mesh(floorGeometry2, floorMaterial);
+        floorCube2.position.y = -5;
+        floorCube2.position.z = -2;
+        scene.add(floorCube2);
+
+        var floorGeometry3 = new THREE.BoxGeometry(30, 0.3, 5);
+        var floorCube3 = new THREE.Mesh(floorGeometry3, floorMaterial);
+        floorCube3.position.y = -5;
+        floorCube3.position.z = -2.5;
+        scene.add(floorCube3);
+
+        var floorGeometry4 = new THREE.BoxGeometry(30, 0.3, 5);
+        var floorCube4 = new THREE.Mesh(floorGeometry4, floorMaterial);
+        floorCube4.position.y = -5;
+        floorCube4.position.z = -7.5;
+        scene.add(floorCube4);
+
+        // Ceiling
+        var ceilingGeometry = new THREE.BoxGeometry(30, 0.3, 20);
+        var ceilingMaterial = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var ceilingCube = new THREE.Mesh(ceilingGeometry, ceilingMaterial);
+        ceilingCube.position.y = 8;
+        scene.add(ceilingCube);
+
+        // Left Wall
+        var leftWallGeometry = new THREE.BoxGeometry(0.3, 20, 20);
+        var leftWallMaterial = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var leftWallCube = new THREE.Mesh(leftWallGeometry, leftWallMaterial);
+        leftWallCube.position.x = -15;
+        scene.add(leftWallCube);
+
+        // Right Wall
+        var rightWallGeometry = new THREE.BoxGeometry(0.3, 20, 20);
+        var rightWallMaterial = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var rightWallCube = new THREE.Mesh(
+          rightWallGeometry,
+          rightWallMaterial
+        );
+        rightWallCube.position.x = 15;
+        scene.add(rightWallCube);
+
+        // Front Wall
+        var frontWallGeometry1 = new THREE.BoxGeometry(0.3, 16, 11.5);
+        var frontWallMaterial1 = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var frontWallCube1 = new THREE.Mesh(
+          frontWallGeometry1,
+          frontWallMaterial1
+        );
+        frontWallCube1.position.x = -9;
+        frontWallCube1.position.z = -10;
+        frontWallCube1.rotation.y = Math.PI / 2;
+        scene.add(frontWallCube1);
+
+        var frontWallGeometry2 = new THREE.BoxGeometry(0.3, 16, 11.5);
+        var frontWallMaterial2 = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var frontWallCube2 = new THREE.Mesh(
+          frontWallGeometry2,
+          frontWallMaterial2
+        );
+        frontWallCube2.position.x = 9;
+        frontWallCube2.position.z = -10;
+        frontWallCube2.rotation.y = Math.PI / 2;
+        scene.add(frontWallCube2);
+
+        var frontWallGeometry3 = new THREE.BoxGeometry(0.3, 2, 7);
+        var frontWallMaterial3 = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var frontWallCube3 = new THREE.Mesh(
+          frontWallGeometry3,
+          frontWallMaterial3
+        );
+        frontWallCube3.position.x = 0;
+        frontWallCube3.position.z = -10;
+        frontWallCube3.rotation.y = Math.PI / 2;
+        frontWallCube3.translateY(7);
+        scene.add(frontWallCube3);
+
+        // Back Wall
+        var backWallGeometry = new THREE.BoxGeometry(0.3, 20, 30);
+        var backWallMaterial = new THREE.MeshLambertMaterial({
+          map: new THREE.TextureLoader().load("new.jpg"),
+          side: THREE.DoubleSide,
+        });
+        var backWallCube = new THREE.Mesh(backWallGeometry, backWallMaterial);
+        backWallCube.position.x = 0;
+        backWallCube.position.z = 10;
+        backWallCube.rotation.y = Math.PI / 2;
+        scene.add(backWallCube);
+      };
+
+      ////////////////////////////// ROOM //////////////////////////////////////
+
+      room();
+
+      var value = 1;
+      var ambientLight = new THREE.PointLight(0xf0f8ff, value);
+      scene.add(ambientLight);
+
+      //Door model
+      let root;
+      var clock = new THREE.Clock();
+      function openDoor() {
+        var maxRotation = Math.PI / 1.4;
+
+        requestAnimationFrame(openDoor);
+
+        // console.log(root.rotation.y);
+        if (root.rotation.y >= -maxRotation) {
+          root.translateX(-3);
+          root.rotation.y -= Math.PI / 15;
+          root.translateX(3);
+        }
+      }
+      const gltfLoader = new GLTFLoader();
+      const url = "./interior_wooden_door/scene.gltf";
+      gltfLoader.load(url, (gltf) => {
+        root = gltf.scene;
+        root.scale.set(8.3, 5.5, 5);
+        root.position.z = -10.1;
+        root.position.y = 0.5;
+        scene.add(root);
+        renderer.domElement.addEventListener("pointerup", (event) => {
+          mouse.x =
+            (event.clientX / renderer.domElement.clientWidth -
+              renderer.domElement.getBoundingClientRect().x) *
+              2 -
+            1;
+          mouse.y =
+            -(
+              event.clientY / renderer.domElement.clientHeight +
+              renderer.domElement.getBoundingClientRect().y
+            ) *
+              2 +
+            1;
+
+          console.log(mouse.x, mouse.y);
+
+          raycaster.setFromCamera(mouse, camera);
+          var objects = [];
+          objects.push(root);
+
+          const intersects = raycaster.intersectObjects(objects, true);
+
+          if (intersects.length > 0) {
+          }
+        });
+      });
+
+      //key model
+      var mydoor = false;
+      var raycaster = new THREE.Raycaster();
+      var mouse = new THREE.Vector2();
+      const gltfLoader13 = new GLTFLoader();
+      const path_key = "./key (2)/scene.gltf";
+      gltfLoader13.load(path_key, (gltf_key) => {
+        var key = gltf_key.scene;
+        key.scale.set(0.0015, 0.0015, 0.0015);
+        key.position.y = 4;
+        key.position.z = -4.7;
+        key.position.x = -14.56;
+        key.rotation.y = Math.PI / 2;
+
+        scene.add(key);
+        renderer.domElement.addEventListener("pointerup", (event) => {
+          mouse.x =(event.clientX / renderer.domElement.clientWidth -  renderer.domElement.getBoundingClientRect().x) *2 -1;
+          mouse.y =-(event.clientY / renderer.domElement.clientHeight +renderer.domElement.getBoundingClientRect().y) *  2 +1;
+
+          console.log(mouse.x, mouse.y);
+
+          raycaster.setFromCamera(mouse, camera);
+          var object44 = [];
+          object44.push(key);
+					var score=0;
+          const intersects = raycaster.intersectObjects(object44, true);
+
+          if (intersects.length > 0) {
+            another();
+            function another() {
+              requestAnimationFrame(another);
+              // key.rotation.x = Math.PI/2;
+              key.position.copy(camera.position);
+              key.rotation.copy(camera.rotation);
+              key.updateMatrix();
+              key.translateZ(-2);
+              mydoor = true;
+              if (mydoor) {
+                openDoor();
+								score++;
+              }
+							if(score==1){
+								alert("you made it");
+							}
+            }
+          }
+        });
+      });
+
+      //fan model
+      const gltfLoader2 = new GLTFLoader();
+      const url2 = "./ceiling_fan/scene.gltf";
+      gltfLoader2.load(url2, (gltf) => {
+        var fan = gltf.scene;
+        fan.scale.set(1.3, 1.3, 1.3);
+        // fan.position.z=0;
+        fan.position.y = -1;
+        scene.add(fan);
+        fanRotation();
+        function fanRotation() {
+          // var maxRotation = Math.PI/1.4;
+          requestAnimationFrame(fanRotation);
+          fan.rotation.y -= Math.PI / 15;
+        }
+      });
+
+      //sofa
+      const gltfLoader3 = new GLTFLoader();
+      const path = "./sofa/scene.gltf";
+      gltfLoader3.load(path, (gltf3) => {
+        var sofa = gltf3.scene;
+        sofa.scale.set(3, 4, 4);
+        sofa.position.y = -3.5;
+        sofa.position.z = -1;
+        sofa.position.x = -10;
+        sofa.rotation.y = Math.PI / 2;
+        scene.add(sofa);
+
+
+	  renderer.domElement.addEventListener("pointerup", (event) => {
+    mouse.x =(event.clientX / renderer.domElement.clientWidth -renderer.domElement.getBoundingClientRect().x) *2 -1;
+    mouse.y =-(event.clientY / renderer.domElement.clientHeight +renderer.domElement.getBoundingClientRect().y) * 2 + 1;
+
+          raycaster.setFromCamera(mouse, camera);
+          var object99 = [];
+          object99.push(sofa);
+
+          const intersectssss = raycaster.intersectObjects(object99, true);
+
+          if (intersectssss.length > 0) {
+
+          }
+        });
+	});
+
+      //tv
+      const gltfLoader4 = new GLTFLoader();
+      const path2 = "./curved_smart_tv_free__agustin_honnun/scene.gltf";
+      gltfLoader4.load(path2, (gltftv) => {
+        var tv = gltftv.scene;
+        tv.scale.set(3, 4, 4);
+        tv.position.y = -3;
+        tv.position.z = -1.5;
+        tv.position.x = 14;
+        tv.rotation.y = -Math.PI / 2;
+        scene.add(tv);
+      });
+
+      //table
+      const gltfLoader6 = new GLTFLoader();
+      const path_table = "./tv_unit/scene.gltf";
+      gltfLoader6.load(path_table, (gltf_table) => {
+        var table = gltf_table.scene;
+        table.scale.set(3.5, 3.5, 3.5);
+        table.position.y = -4.6;
+        table.position.z = -4;
+        table.position.x = 14;
+        table.rotation.y = -Math.PI / 2;
+        // tv.rotation.z = -Math.PI/8;
+        scene.add(table);
+      });
+
+      //painting
+      var mouse2 = new THREE.Vector2();
+      const gltfLoader5 = new GLTFLoader();
+      const painting_path = "./art_painting/scene.gltf";
+      gltfLoader.load(painting_path, (gltf_painting) => {
+        var painting = gltf_painting.scene;
+        painting.scale.set(0.05, 0.05, 0.05);
+        painting.position.z = -4;
+        painting.position.y = 4;
+        painting.position.x = -14.5;
+        // painting.rotation.y=-Math.PI;
+        scene.add(painting);
+        renderer.domElement.addEventListener("pointerup", (event) => {
+          mouse2.x =
+            (event.clientX / renderer.domElement.clientWidth -
+              renderer.domElement.getBoundingClientRect().x) *
+              2 -
+            1;
+          mouse2.y =
+            -(
+              event.clientY / renderer.domElement.clientHeight +
+              renderer.domElement.getBoundingClientRect().y
+            ) * 2 + 1;
+
+          console.log(mouse2.x, mouse2.y);
+
+          raycaster.setFromCamera(mouse2, camera);
+          var object2 = [];
+          object2.push(painting);
+
+          const intersects = raycaster.intersectObjects(object2, true);
+
+          if (intersects.length > 0) {
+            fall();
+            function fall() {
+              var maxRotation = -1;
+
+              requestAnimationFrame(fall);
+
+              console.log(painting.position.y);
+              if (painting.position.y >= maxRotation) {
+                painting.translateY(-0.5);
+              }
+            }
+          }
+        });
+      });
+
+      //	Secret Box
+      function openBox() {
+        var maxRotation = Math.PI / 1.4;
+
+        requestAnimationFrame(openBox);
+
+        if (cube1.rotation.y <= maxRotation) {
+          cube1.translateX(-3);
+          cube1.rotation.y += Math.PI / 15;
+          cube1.translateX(3);
+        }
+      }
+
+      //open safe
+
+      function openSafe() {
+        var safe1 = new THREE.Mesh(geometry, materialsx);
+        safe1.position.y = -4.5;
+        safe1.position.z = -6;
+        safe1.position.x = -10;
+
+        scene.add(safe1);
+      }
+
+      //lamp
+      const gltfLoader7 = new GLTFLoader();
+      const path_lamp = "./floor_lamp/scene.gltf";
+      gltfLoader7.load(path_lamp, (gltf_lamp) => {
+        var lamp = gltf_lamp.scene;
+        lamp.scale.set(0.035, 0.035, 0.035);
+        lamp.position.y = -5;
+        lamp.position.z = 4;
+        lamp.position.x = -10;
+        scene.add(lamp);
+      });
+
+      const gltfLoader8 = new GLTFLoader();
+      const path_switch = "./light_switch/scene.gltf";
+      gltfLoader8.load(path_switch, (gltf_switch) => {
+        var light_switch = gltf_switch.scene;
+        light_switch.scale.set(8, 8, 8);
+        light_switch.position.y = 0;
+        light_switch.position.z = -7;
+        light_switch.position.x = 14.5;
+        light_switch.rotation.y = -Math.PI;
+        scene.add(light_switch);
+
+        renderer.domElement.addEventListener("pointerup", (event) => {
+          mouse.x =
+            (event.clientX / renderer.domElement.clientWidth -
+              renderer.domElement.getBoundingClientRect().x) *
+              2 -
+            1;
+          mouse.y =
+            -(
+              event.clientY / renderer.domElement.clientHeight +
+              renderer.domElement.getBoundingClientRect().y
+            ) *
+              2 +
+            1;
+
+          raycaster.setFromCamera(mouse, camera);
+          var object_light = [];
+          object_light.push(light_switch);
+
+          const intersects = raycaster.intersectObjects(object_light, true);
+
+          if (intersects.length > 0) {
+            console.log("intersect");
+
+            if (ON == true) {
+              scene.add(cube1);
+
+              //second key
+
+              const path_key1 = "./key (2)/scene.gltf";
+              gltfLoader13.load(path_key1, (gltf_key) => {
+                var key1 = gltf_key.scene;
+                key1.scale.set(0.0015, 0.0015, 0.0015);
+                key1.position.y = 1.5;
+                key1.position.z = -9.3;
+                key1.position.x = 9;
+                //key1.rotation.y = Math.PI/2;
+                scene.add(key1);
+
+                //lock
+                const gltfLoaderlock = new GLTFLoader();
+                const path_lock = "lock.glb";
+                gltfLoaderlock.load(path_lock, (gltflock) => {
+                  var lock = gltflock.scene;
+                  lock.scale.set(1, 2, 2);
+                  lock.position.y = -4.3;
+                  lock.position.z = -6;
+                  lock.position.x = -9.3;
+
+                  lock.rotation.y = Math.PI / 2;
+                  scene.add(lock);
+
+                  renderer.domElement.addEventListener("pointerup", (event) => {
+                    mouse.x =
+                      (event.clientX / renderer.domElement.clientWidth -
+                        renderer.domElement.getBoundingClientRect().x) *
+                        2 - 1;
+                    mouse.y =
+                      -(
+                        event.clientY / renderer.domElement.clientHeight +
+                        renderer.domElement.getBoundingClientRect().y
+                      ) *
+                        2 + 1;
+
+                    raycaster.setFromCamera(mouse, camera);
+                    var object44 = [];
+                    object44.push(key1);
+
+                    const intersects = raycaster.intersectObjects(
+                      object44,
+                      true
+                    );
+
+                    if (intersects.length > 0) {
+                      another1();
+                      function another1() {
+                        requestAnimationFrame(another1);
+                        key1.position.copy(camera.position);
+                        key1.rotation.copy(camera.rotation);
+                        key1.updateMatrix();
+                        key1.translateZ(-2);
+
+                        //click safeeeee
+                        renderer.domElement.addEventListener(
+                          "pointerup",
+                          (event) => {
+                            raycaster.setFromCamera(mouse, camera);
+                            var object45 = [];
+                            object45.push(safe);
+
+                            const intersects1 = raycaster.intersectObjects(
+                              object45,
+                              true
+                            );
+                            if (intersects1.length > 0) {
+                              openSafe();
+                              createPaper();
+                              scene.remove(lock);
+                              scene.remove(key1);
+                            }
+                          }
+                        );
+                      }
+
+                      // display paper
+                      var modal = document.getElementById("myModal");
+
+                      // Get the <span> element that closes the modal
+                      var span = document.getElementsByClassName("close")[0];
+
+                      // When the user clicks on the button, open the modal
+                      safe.onclick = function () {
+                        modal.style.display = "block";
+                      };
+
+                      // When the user clicks on <span> (x), close the modal
+                      span.onclick = function () {
+                        modal.style.display = "none";
+                      };
+
+                      // When the user clicks anywhere outside of the modal, close it
+                      window.onclick = function (event) {
+                        if (event.target == modal) {
+                          modal.style.display = "none";
+                        }
+                      };
+                    }
+                  });
+                });
+              });
+              value = 0.5;
+              ambientLight.intensity = value;
+
+              ON = false;
+            } else if (ON == false) {
+              value = 1;
+              ambientLight.intensity = value;
+              scene.remove(cube1);
+              ON = true;
+            }
+          }
+        });
+      });
+
+      function createPaper() {
+        var paperGeo = new THREE.BoxGeometry(6, 4, 0.02);
+        var paperMaterial = new THREE.MeshBasicMaterial({
+          map: new THREE.TextureLoader().load("paper.png"),
+        });
+        var paper = new THREE.Mesh(paperGeo, paperMaterial);
+        //  paper.scale.set(1.3,1.3,1.3);
+        paper.position.y = 0;
+        paper.position.z = 0;
+        paper.position.x = 0;
+        // paper.rotation.x=Math.PI/2;
+        scene.add(paper);
+
+        renderer.domElement.addEventListener("pointerup", (event) => {
+          raycaster.setFromCamera(mouse, camera);
+          var object50 = [];
+          object50.push(paper);
+
+          const intersects1 = raycaster.intersectObjects(object50, true);
+          if (intersects1.length > 0) {
+            scene.remove(paper);
+          }
+        });
+      }
+
+      var maxRotate = 0.5;
+      var maxMove1 = 14;
+      var maxMove2 = 7;
+
+      document.addEventListener("keydown", function (e) {
+        switch (e.keyCode) {
+          case 37: //left
+            if (camera.position.x > -maxMove1) {
+              camera.translateX(-0.25);
+              break;
+            } else {
+              break;
+            }
+
+          case 38: //up
+            if (camera.position.z > -maxMove2) {
+              camera.translateZ(-0.25);
+              break;
+            } else {
+              break;
+            }
+
+          case 39: //right
+            if (camera.position.x < maxMove1) {
+              camera.translateX(0.25);
+              break;
+            } else {
+              break;
+            }
+          case 40: //down
+            // controls.moveForward(-0.25);
+            if (camera.position.z < maxMove2) {
+              camera.translateZ(0.25);
+              break;
+            } else {
+              break;
+            }
+
+          case 65: //left(a)
+            camera.rotation.y += Math.PI / 15;
+            break;
+
+          case 68: //right (d)
+            camera.rotation.y -= Math.PI / 15;
+            break;
+          case 87: //look up (w)
+            //0.82839634745074 0 0.5205428923689763
+            // camera.rotation.x+=Math.PI/15;
+            // console.log(camera.position);
+            if (camera.rotation.x <= maxRotate) camera.rotation.x += 0.25;
+            break;
+
+          case 83: //look down (d)
+            if (camera.rotation.x >= -maxRotate) camera.rotation.x -= 0.25;
+            break;
+        }
+      });
+
+      // draw scene
+      var render = function () {
+        renderer.render(scene, camera);
+        // controls.update();
+      };
+
+      // run game loop (update, render, repeat)
+      var GameLoop = function () {
+        requestAnimationFrame(GameLoop);
+        // controls.update();
+        // update( );
+        render();
+        var delta = clock.getDelta();
+      };
+
+      GameLoop();
+    </script>
+  </body>
+</html>
